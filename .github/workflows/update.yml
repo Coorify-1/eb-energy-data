@@ -18,7 +18,7 @@ concurrency:
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
     env:
       SITE_URL: ${{ vars.SITE_URL }}
       FRED_API_KEY: ${{ secrets.FRED_API_KEY }}

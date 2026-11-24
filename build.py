@@ -50,7 +50,7 @@ def log(name, ok, msg=""):
 # HTTP
 # --------------------------------------------------------------------------- #
 
-def get(url, timeout=60, tries=3, binary=False):
+def get(url, timeout=45, tries=2, binary=False):
     last = None
     for i in range(tries):
         try:
@@ -347,7 +347,7 @@ _owid = None
 def owid():
     global _owid
     if _owid is None:
-        _owid = list(csv.DictReader(io.StringIO(get(OWID_URL, timeout=120))))
+        _owid = list(csv.DictReader(io.StringIO(get(OWID_URL, timeout=90))))
     return _owid
 
 
@@ -458,7 +458,7 @@ WORLD_SERIES = [
 
 def wb_indicator(code, iso="all", since=1990):
     url = f"{WB}/country/{iso}/indicator/{code}?format=json&per_page=20000&date={since}:{NOW.year}"
-    j = get_json(url, timeout=120)
+    j = get_json(url, timeout=90)
     if not isinstance(j, list) or len(j) < 2 or not j[1]:
         raise RuntimeError(code + ": empty")
     return j[1]
@@ -589,7 +589,7 @@ EU_NAMES = {"AT": "Austria", "BE": "Belgium", "BG": "Bulgaria", "CY": "Cyprus", 
 
 def eu_pump():
     import openpyxl  # installed by the workflow
-    wb = openpyxl.load_workbook(io.BytesIO(get(WOB_URL, timeout=180, binary=True)),
+    wb = openpyxl.load_workbook(io.BytesIO(get(WOB_URL, timeout=120, binary=True)),
                                 read_only=True, data_only=True)
     ws = None
     for name in wb.sheetnames:
@@ -792,8 +792,26 @@ def main():
         owid()  # download once, shared by 3 builders
     except Exception as e:  # noqa
         print("OWID download failed:", e)
-    pmap(lambda fn: fn(), jobs, 6)
-    build_csvs()
+    # hard time limit: a source that hangs must never block the whole site
+    ex = cf.ThreadPoolExecutor(6)
+    futs = {ex.submit(fn): fn.__name__ for fn in jobs}
+    done, late = cf.wait(futs, timeout=int(os.environ.get("JOB_BUDGET", "480")))
+    for fu in late:
+        name = futs[fu]
+        kept = keep_previous(name)
+        log(name, False, "timed out" + (" (previous file kept)" if kept else ""))
+    ex.shutdown(wait=False, cancel_futures=True)
+    cx = cf.ThreadPoolExecutor(1)
+    try:
+        cx.submit(build_csvs).result(timeout=int(os.environ.get("CSV_BUDGET", "360")))
+    except Exception as e:  # noqa
+        print("CSV refresh stopped:", e)
+        for slug in CSV_SERIES:  # make sure every CSV is still published
+            t, st = os.path.join(IND, slug + ".csv"), os.path.join(ROOT, "data", "indicators", slug + ".csv")
+            if not os.path.exists(t) and os.path.exists(st):
+                os.makedirs(IND, exist_ok=True)
+                shutil.copyfile(st, t)
+    cx.shutdown(wait=False, cancel_futures=True)
 
     # static extras: CORS headers, cache, a small index page and a status file
     with open(os.path.join(OUT, "_headers"), "w") as fh:
@@ -814,8 +832,9 @@ def main():
     bad = [n for n, ok, _ in REPORT if not ok]
     print(f"\nDone: {len(REPORT) - len(bad)} OK, {len(bad)} failed {bad}")
     api_bad = [n for n in bad if not n.startswith("csv")]  # CSVs always fall back to the stored copy
-    if len(api_bad) > 15 // 2:
-        sys.exit(1)  # something is badly wrong: do not deploy a mostly empty site
+    sys.stdout.flush()
+    # os._exit: do not wait for threads stuck on a slow server
+    os._exit(1 if len(api_bad) > 15 // 2 else 0)  # mostly empty site: do not deploy
 
 
 if __name__ == "__main__":
