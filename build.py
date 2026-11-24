@@ -165,17 +165,25 @@ def fred_series(sid, start=None):
 
 
 def fred_block(items, start):
+    days = (NOW - dt.datetime.strptime(start, "%Y-%m-%d").replace(tzinfo=dt.timezone.utc)).days
+
     def one(it):
         try:
-            s = fred_series(it["id"], start)
+            s = None
+            if it.get("eia"):
+                try:
+                    s = eia_weekly(it["eia"], it.get("freq", "d"), days)
+                except Exception as e:  # noqa
+                    print("   EIA", it["eia"], e, "; trying FRED")
+            s = s or fred_series(it["id"], start)
             return {"id": it["id"], "name": it["name"], "unit": it["unit"],
                     "date": s[-1]["date"], "series": s}
         except Exception as e:  # noqa
             print("   skip", it["id"], e)
             return None
-    out = [x for x in pmap(one, items) if x]
+    out = [x for x in pmap(one, items, 3) if x]
     if not out:
-        raise RuntimeError("no FRED series answered")
+        raise RuntimeError("no series answered (EIA / FRED)")
     return out
 
 
@@ -186,8 +194,8 @@ def ago(days):
 @job("crude")
 def build_crude():
     d = fred_block(CFG["benchmarks"], ago(400))
-    return envelope(d, "US EIA spot prices via FRED", "U.S. EIA via FRED",
-                    "https://fred.stlouisfed.org", "Public domain"), f"{len(d)} series"
+    return envelope(d, "Spot prices", "U.S. EIA",
+                    "https://www.eia.gov/petroleum/data.php", "Public domain"), f"{len(d)} series"
 
 
 @job("fred")
@@ -197,11 +205,11 @@ def build_fred():
                     "https://fred.stlouisfed.org", "Public domain"), f"{len(d)} series"
 
 
-def eia_weekly(sid):
-    """U.S. EIA history file (.xls), no key: https://www.eia.gov/dnav/pet/hist_xls/<ID>w.xls"""
+def eia_weekly(sid, freq="w", since_days=400):
+    """U.S. EIA history file (.xls), no key: https://www.eia.gov/dnav/pet/hist_xls/<ID><d|w|m>.xls"""
     import xlrd  # installed by the workflow
-    folder = "ng" if sid.startswith("NW") else "pet"
-    raw = get(f"https://www.eia.gov/dnav/{folder}/hist_xls/{sid}w.xls", timeout=60, binary=True)
+    folder = "ng" if sid.startswith(("NW", "RNG", "N9")) else "pet"
+    raw = get(f"https://www.eia.gov/dnav/{folder}/hist_xls/{sid}{freq}.xls", timeout=60, binary=True)
     book = xlrd.open_workbook(file_contents=raw)
     sh = book.sheet_by_name("Data 1") if "Data 1" in book.sheet_names() else book.sheet_by_index(1)
     pts = []
@@ -209,7 +217,7 @@ def eia_weekly(sid):
         a, b = sh.cell(i, 0), sh.cell(i, 1)
         if a.ctype == xlrd.XL_CELL_DATE and b.ctype == xlrd.XL_CELL_NUMBER:
             d = xlrd.xldate.xldate_as_datetime(a.value, book.datemode).strftime("%Y-%m-%d")
-            if d >= ago(400):
+            if d >= ago(since_days):
                 pts.append({"date": d, "value": round(b.value, 3)})
     if len(pts) < 3:
         raise RuntimeError(sid + ": no data")
@@ -220,12 +228,18 @@ def eia_weekly(sid):
 def build_eiaweekly():
     def one(it):
         try:
-            s = eia_weekly(it["id"]) if it.get("src") == "eia" else fred_series(it["id"], ago(400))
+            s = None
+            if it.get("eia"):
+                try:
+                    s = eia_weekly(it["eia"], "w")
+                except Exception as e:  # noqa
+                    print("   EIA", it["eia"], e, "; trying FRED")
+            s = s or fred_series(it["id"], ago(400))
             return {"id": it["id"], "name": it["name"], "unit": it["unit"], "date": s[-1]["date"], "series": s}
         except Exception as e:  # noqa
             print("   skip", it["id"], e)
             return None
-    d = [x for x in pmap(one, CFG["us_weekly"], 4) if x]
+    d = [x for x in pmap(one, CFG["us_weekly"], 3) if x]
     if not d:
         raise RuntimeError("no weekly series answered")
     return envelope(d, "Weekly Petroleum Status Report", "U.S. EIA",
@@ -633,8 +647,12 @@ def build_fuel():
     except Exception as e:  # noqa
         print("   EU bulletin:", e)
     try:
-        p = fred_series("GASREGW", ago(60))[-1]
-        d = fred_series("GASDESW", ago(60))[-1]
+        try:
+            p = eia_weekly("EMM_EPMR_PTE_NUS_DPG", "w", 60)[-1]
+            d = eia_weekly("EMD_EPD2D_PTE_NUS_DPG", "w", 60)[-1]
+        except Exception:
+            p = fred_series("GASREGW", ago(60))[-1]
+            d = fred_series("GASDESW", ago(60))[-1]
         data["us"] = {"name": "United States", "iso3": "USA", "date": p["date"], "unit": "USD/gallon",
                       "petrol": p["value"], "diesel": d["value"]}
         notes.append("US " + p["date"])

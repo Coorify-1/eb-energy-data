@@ -2,14 +2,14 @@
   "_lisez_moi": "Edit this file to change cities, power zones, news feeds and events. No code to touch.",
 
   "benchmarks": [
-    {"id": "DCOILBRENTEU", "name": "Brent crude", "unit": "$/bbl"},
-    {"id": "DCOILWTICO", "name": "WTI crude", "unit": "$/bbl"},
-    {"id": "DHHNGSP", "name": "Henry Hub natural gas", "unit": "$/MMBtu"},
-    {"id": "DGASNYH", "name": "Gasoline, NY Harbor", "unit": "$/gal"},
-    {"id": "DDFUELNYH", "name": "Diesel ULSD, NY Harbor", "unit": "$/gal"},
-    {"id": "DJFUELUSGULF", "name": "Jet fuel, US Gulf", "unit": "$/gal"},
-    {"id": "DHOILNYH", "name": "Heating oil, NY Harbor", "unit": "$/gal"},
-    {"id": "DPROPANEMBTX", "name": "Propane, Mont Belvieu", "unit": "$/gal"}
+    {"id": "DCOILBRENTEU", "eia": "RBRTE", "freq": "d", "name": "Brent crude", "unit": "$/bbl"},
+    {"id": "DCOILWTICO", "eia": "RWTC", "freq": "d", "name": "WTI crude", "unit": "$/bbl"},
+    {"id": "DHHNGSP", "eia": "RNGWHHD", "freq": "d", "name": "Henry Hub natural gas", "unit": "$/MMBtu"},
+    {"id": "DGASNYH", "eia": "EER_EPMRU_PF4_Y35NY_DPG", "freq": "d", "name": "Gasoline, NY Harbor", "unit": "$/gal"},
+    {"id": "DDFUELNYH", "eia": "EER_EPD2DXL0_PF4_Y35NY_DPG", "freq": "d", "name": "Diesel ULSD, NY Harbor", "unit": "$/gal"},
+    {"id": "DJFUELUSGULF", "eia": "EER_EPJK_PF4_RGC_DPG", "freq": "d", "name": "Jet fuel, US Gulf", "unit": "$/gal"},
+    {"id": "DHOILNYH", "eia": "EER_EPD2F_PF4_Y35NY_DPG", "freq": "d", "name": "Heating oil, NY Harbor", "unit": "$/gal"},
+    {"id": "DPROPANEMBTX", "eia": "EER_EPLLPA_PF4_Y44MB_DPG", "freq": "d", "name": "Propane, Mont Belvieu", "unit": "$/gal"}
   ],
 
   "commodities": [
@@ -25,15 +25,15 @@
   ],
 
   "us_weekly": [
-    {"id": "WCESTUS1", "name": "Crude oil stocks (excl. SPR)", "unit": "kb", "src": "eia"},
-    {"id": "WCSSTUS1", "name": "Strategic Petroleum Reserve", "unit": "kb", "src": "eia"},
-    {"id": "WGTSTUS1", "name": "Gasoline stocks", "unit": "kb", "src": "eia"},
-    {"id": "WDISTUS1", "name": "Distillate stocks", "unit": "kb", "src": "eia"},
-    {"id": "WCRFPUS2", "name": "Crude oil production", "unit": "kb/d", "src": "eia"},
-    {"id": "WPULEUS3", "name": "Refinery utilisation", "unit": "%", "src": "eia"},
-    {"id": "NW2_EPG0_SWO_R48_BCF", "name": "Natural gas in storage", "unit": "Bcf", "src": "eia"},
-    {"id": "GASREGW", "name": "Retail gasoline, regular", "unit": "$/gal"},
-    {"id": "GASDESW", "name": "Retail diesel", "unit": "$/gal"}
+    {"id": "WCESTUS1", "eia": "WCESTUS1", "name": "Crude oil stocks (excl. SPR)", "unit": "kb"},
+    {"id": "WCSSTUS1", "eia": "WCSSTUS1", "name": "Strategic Petroleum Reserve", "unit": "kb"},
+    {"id": "WGTSTUS1", "eia": "WGTSTUS1", "name": "Gasoline stocks", "unit": "kb"},
+    {"id": "WDISTUS1", "eia": "WDISTUS1", "name": "Distillate stocks", "unit": "kb"},
+    {"id": "WCRFPUS2", "eia": "WCRFPUS2", "name": "Crude oil production", "unit": "kb/d"},
+    {"id": "WPULEUS3", "eia": "WPULEUS3", "name": "Refinery utilisation", "unit": "%"},
+    {"id": "NW2_EPG0_SWO_R48_BCF", "eia": "NW2_EPG0_SWO_R48_BCF", "name": "Natural gas in storage", "unit": "Bcf"},
+    {"id": "GASREGW", "eia": "EMM_EPMR_PTE_NUS_DPG", "name": "Retail gasoline, regular", "unit": "$/gal"},
+    {"id": "GASDESW", "eia": "EMD_EPD2D_PTE_NUS_DPG", "name": "Retail diesel", "unit": "$/gal"}
   ],
 
   "fx_history": ["EUR", "GBP", "JPY", "CNY", "INR", "ZAR", "BRL", "CAD", "AUD", "MXN", "CHF", "NOK", "KRW", "TRY"],
@@ -66,6 +66,8 @@
   ],
 
   "search_feeds": [
+    ["ESI Africa", "https://www.esi-africa.com/feed/"],
+    ["Energy Capital & Power", "https://energycapitalpower.com/feed/"],
     ["Google News", "https://news.google.com/rss/search?q=Africa+energy+(power+OR+oil+OR+gas+OR+solar)+when:7d&hl=en&gl=NG&ceid=NG:en"]
   ],
 
