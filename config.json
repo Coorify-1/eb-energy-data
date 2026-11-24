@@ -25,12 +25,13 @@
   ],
 
   "us_weekly": [
-    {"id": "WCESTUS1", "name": "Crude oil stocks (excl. SPR)", "unit": "kb"},
-    {"id": "WCSSTUS1", "name": "Strategic Petroleum Reserve", "unit": "kb"},
-    {"id": "WGTSTUS1", "name": "Gasoline stocks", "unit": "kb"},
-    {"id": "WDISTUS1", "name": "Distillate stocks", "unit": "kb"},
-    {"id": "WCRFPUS2", "name": "Crude oil production", "unit": "kb/d"},
-    {"id": "WPULEUS3", "name": "Refinery utilisation", "unit": "%"},
+    {"id": "WCESTUS1", "name": "Crude oil stocks (excl. SPR)", "unit": "kb", "src": "eia"},
+    {"id": "WCSSTUS1", "name": "Strategic Petroleum Reserve", "unit": "kb", "src": "eia"},
+    {"id": "WGTSTUS1", "name": "Gasoline stocks", "unit": "kb", "src": "eia"},
+    {"id": "WDISTUS1", "name": "Distillate stocks", "unit": "kb", "src": "eia"},
+    {"id": "WCRFPUS2", "name": "Crude oil production", "unit": "kb/d", "src": "eia"},
+    {"id": "WPULEUS3", "name": "Refinery utilisation", "unit": "%", "src": "eia"},
+    {"id": "NW2_EPG0_SWO_R48_BCF", "name": "Natural gas in storage", "unit": "Bcf", "src": "eia"},
     {"id": "GASREGW", "name": "Retail gasoline, regular", "unit": "$/gal"},
     {"id": "GASDESW", "name": "Retail diesel", "unit": "$/gal"}
   ],

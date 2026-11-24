@@ -197,11 +197,39 @@ def build_fred():
                     "https://fred.stlouisfed.org", "Public domain"), f"{len(d)} series"
 
 
+def eia_weekly(sid):
+    """U.S. EIA history file (.xls), no key: https://www.eia.gov/dnav/pet/hist_xls/<ID>w.xls"""
+    import xlrd  # installed by the workflow
+    folder = "ng" if sid.startswith("NW") else "pet"
+    raw = get(f"https://www.eia.gov/dnav/{folder}/hist_xls/{sid}w.xls", timeout=60, binary=True)
+    book = xlrd.open_workbook(file_contents=raw)
+    sh = book.sheet_by_name("Data 1") if "Data 1" in book.sheet_names() else book.sheet_by_index(1)
+    pts = []
+    for i in range(sh.nrows):
+        a, b = sh.cell(i, 0), sh.cell(i, 1)
+        if a.ctype == xlrd.XL_CELL_DATE and b.ctype == xlrd.XL_CELL_NUMBER:
+            d = xlrd.xldate.xldate_as_datetime(a.value, book.datemode).strftime("%Y-%m-%d")
+            if d >= ago(400):
+                pts.append({"date": d, "value": round(b.value, 3)})
+    if len(pts) < 3:
+        raise RuntimeError(sid + ": no data")
+    return pts
+
+
 @job("eiaweekly")
 def build_eiaweekly():
-    d = fred_block(CFG["us_weekly"], ago(400))
-    return envelope(d, "US EIA weekly data via FRED", "U.S. EIA via FRED",
-                    "https://fred.stlouisfed.org", "Public domain"), f"{len(d)} series"
+    def one(it):
+        try:
+            s = eia_weekly(it["id"]) if it.get("src") == "eia" else fred_series(it["id"], ago(400))
+            return {"id": it["id"], "name": it["name"], "unit": it["unit"], "date": s[-1]["date"], "series": s}
+        except Exception as e:  # noqa
+            print("   skip", it["id"], e)
+            return None
+    d = [x for x in pmap(one, CFG["us_weekly"], 4) if x]
+    if not d:
+        raise RuntimeError("no weekly series answered")
+    return envelope(d, "Weekly Petroleum Status Report", "U.S. EIA",
+                    "https://www.eia.gov/petroleum/supply/weekly/", "Public domain"), f"{len(d)} series"
 
 
 # --------------------------------------------------------------------------- #
@@ -257,7 +285,18 @@ def build_power():
     def one(z):
         code, name = z
         try:
-            j = get_json("https://api.energy-charts.info/price?bzn=" + urllib.parse.quote(code), timeout=40)
+            j = None
+            for wait in (0, 4, 10, 20):
+                time.sleep(wait or 1.2)
+                try:
+                    j = get_json("https://api.energy-charts.info/price?bzn=" + urllib.parse.quote(code),
+                                 timeout=40, tries=1)
+                    break
+                except Exception as e:  # noqa
+                    if "429" not in str(e):
+                        raise
+            if j is None:
+                raise RuntimeError("429 rate limit")
             ts, pr = j.get("unix_seconds") or [], j.get("price") or []
             pts = [{"time": dt.datetime.fromtimestamp(t, dt.timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
                     "value": round(p, 2)} for t, p in zip(ts, pr) if p is not None]
@@ -272,7 +311,7 @@ def build_power():
         except Exception as e:  # noqa
             print("   skip", code, e)
             return None
-    rows = [r for r in pmap(one, CFG["power_zones"], 6) if r]
+    rows = [r for r in map(one, CFG["power_zones"]) if r]  # one by one: the API rate-limits
     if len(rows) < 3:
         raise RuntimeError("too few bidding zones")
     first = rows[0]["series"][0]["time"]
@@ -300,7 +339,7 @@ def owid():
 
 def iso_of(r):
     c = (r.get("iso_code") or "").strip()
-    if c == "OWID_WRL":
+    if c == "OWID_WRL" or (not c and (r.get("country") or "").strip() == "World"):
         return "WLD"
     return c if re.fullmatch(r"[A-Z]{3}", c) else None
 
@@ -628,9 +667,28 @@ def build_equities():
         except Exception:
             return None
     out = [x for x in pmap(one, CFG["equities"], 4) if x]
+    src = "Stooq"
+    if not out:
+        def yahoo(e):
+            sym, name, grp = e
+            try:
+                t = sym.split(".")[0].upper()
+                j = get_json(f"https://query1.finance.yahoo.com/v8/finance/chart/{t}?range=10d&interval=1d", tries=2)
+                r = j["chart"]["result"][0]
+                closes = [c for c in r["indicators"]["quote"][0]["close"] if c is not None]
+                if len(closes) < 2:
+                    return None
+                day = dt.datetime.fromtimestamp(r["timestamp"][-1], dt.timezone.utc).strftime("%Y-%m-%d")
+                return {"name": name, "symbol": t, "group": grp, "currency": r["meta"].get("currency", "USD"),
+                        "price": round(closes[-1], 2),
+                        "changePct": round((closes[-1] - closes[-2]) / closes[-2] * 100, 2), "date": day}
+            except Exception:
+                return None
+        out = [x for x in pmap(yahoo, CFG["equities"], 3) if x]
+        src = "Yahoo Finance"
     if not out:
         raise RuntimeError("Stooq did not answer (remove the Energy equities panel if this persists)")
-    return envelope(out, "Daily close", "Stooq", "https://stooq.com", "Free, delayed"), f"{len(out)} stocks"
+    return envelope(out, "Daily close", src, "", "Free, delayed"), f"{len(out)} stocks"
 
 
 # --------------------------------------------------------------------------- #
