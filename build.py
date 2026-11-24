@@ -674,7 +674,7 @@ def build_equities():
     def one(e):
         sym, name, grp = e
         try:
-            txt = get(f"https://stooq.com/q/d/l/?s={sym}&i=d&d1={ago(20).replace('-', '')}", tries=2)
+            txt = get(f"https://stooq.com/q/d/l/?s={sym}&i=d&d1={ago(20).replace('-', '')}", timeout=20, tries=1)
             rows = [r for r in csv.reader(io.StringIO(txt)) if r and re.match(r"\d{4}-", r[0])]
             if len(rows) < 2:
                 return None
@@ -684,14 +684,15 @@ def build_equities():
                     "changePct": round((c1 - c0) / c0 * 100, 2), "date": rows[-1][0]}
         except Exception:
             return None
-    out = [x for x in pmap(one, CFG["equities"], 4) if x]
-    src = "Stooq"
-    if not out:
+    def _stooq_all():
+        return [x for x in pmap(one, CFG["equities"], 4) if x]
+
+    if True:
         def yahoo(e):
             sym, name, grp = e
             try:
                 t = sym.split(".")[0].upper()
-                j = get_json(f"https://query1.finance.yahoo.com/v8/finance/chart/{t}?range=10d&interval=1d", tries=2)
+                j = get_json(f"https://query1.finance.yahoo.com/v8/finance/chart/{t}?range=10d&interval=1d", timeout=20, tries=2)
                 r = j["chart"]["result"][0]
                 closes = [c for c in r["indicators"]["quote"][0]["close"] if c is not None]
                 if len(closes) < 2:
@@ -704,6 +705,8 @@ def build_equities():
                 return None
         out = [x for x in pmap(yahoo, CFG["equities"], 3) if x]
         src = "Yahoo Finance"
+    if not out:
+        out, src = _stooq_all(), "Stooq"
     if not out:
         raise RuntimeError("Stooq did not answer (remove the Energy equities panel if this persists)")
     return envelope(out, "Daily close", src, "", "Free, delayed"), f"{len(out)} stocks"
