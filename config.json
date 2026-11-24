@@ -80,5 +80,16 @@
   ],
 
   "events": [
+    {"title": "OPEC+ 42nd Ministerial Meeting (2027 production framework)", "start": "2026-11-29", "location": "Online", "url": "https://opec.org/pr-detail/605-7-june-2026.html"},
+    {"title": "Practical Nigerian Content Forum", "start": "2026-11-30", "end": "2026-12-03", "location": "Bayelsa, Nigeria", "url": "https://www.energyconnects.com/events/upcoming-events?page=3"},
+    {"title": "Wider African Energy Summit", "start": "2026-12-01", "end": "2026-12-02", "location": "London", "url": "https://ukerc.ac.uk/events/the-wider-african-energy-summit-2026-london-uk/"},
+    {"title": "World LNG Summit & Awards", "start": "2026-12-01", "end": "2026-12-04", "location": "Istanbul", "url": "https://www.energyconnects.com/events/upcoming-events?page=3"},
+    {"title": "Beijing Energy Congress", "start": "2027-01-13", "end": "2027-01-15", "location": "Beijing", "url": "https://www.energyconnects.com/events/upcoming-events?page=3"},
+    {"title": "SPE International HSE & Sustainability Conference", "start": "2027-01-18", "end": "2027-01-20", "location": "Abu Dhabi", "url": "https://www.ipieca.org/insights/events"},
+    {"title": "Africa Energy Indaba", "start": "2027-03-02", "end": "2027-03-04", "location": "Cape Town", "url": "https://www.engineeringnews.co.za/article/africas-energy-leaders-to-gather-in-cape-town-as-continent-turns-energy-challenge-into-growth-opportunity-2026-10-06"},
+    {"title": "CERAWeek by S&P Global", "start": "2027-03-08", "end": "2027-03-12", "location": "Houston", "url": "https://www.ceraweek.com"},
+    {"title": "EGYPES Egypt Energy Show, Strategic Conference", "start": "2027-03-30", "end": "2027-04-01", "location": "Cairo", "url": "https://www.egypes.com/conferences/strategic-conference"},
+    {"title": "Invest in African Energy Forum (IAE 2027)", "start": "2027-05-11", "end": "2027-05-13", "location": "Paris", "url": "https://www.zawya.com/en/press-release/africa-press-releases/invest-in-african-energy-iae-2027-in-paris-strengthens-its-role-as-africas-premier-capital-allocation-and-deal-fm3e406c"},
+    {"title": "IAEE European Conference", "start": "2027-06-21", "end": "2027-06-24", "location": "Madrid", "url": "https://iaee.org/en/conferences/2012-Perth.aspx"}
   ]
 }
