@@ -1,0 +1,81 @@
+{
+  "_lisez_moi": "Edit this file to change cities, power zones, news feeds and events. No code to touch.",
+
+  "benchmarks": [
+    {"id": "DCOILBRENTEU", "name": "Brent crude", "unit": "$/bbl"},
+    {"id": "DCOILWTICO", "name": "WTI crude", "unit": "$/bbl"},
+    {"id": "DHHNGSP", "name": "Henry Hub natural gas", "unit": "$/MMBtu"},
+    {"id": "DGASNYH", "name": "Gasoline, NY Harbor", "unit": "$/gal"},
+    {"id": "DDFUELNYH", "name": "Diesel ULSD, NY Harbor", "unit": "$/gal"},
+    {"id": "DJFUELUSGULF", "name": "Jet fuel, US Gulf", "unit": "$/gal"},
+    {"id": "DHOILNYH", "name": "Heating oil, NY Harbor", "unit": "$/gal"},
+    {"id": "DPROPANEMBTX", "name": "Propane, Mont Belvieu", "unit": "$/gal"}
+  ],
+
+  "commodities": [
+    {"id": "PNGASEUUSDM", "name": "Natural gas, Europe", "unit": "$/MMBtu"},
+    {"id": "PNGASJPUSDM", "name": "LNG, Asia (Japan)", "unit": "$/MMBtu"},
+    {"id": "PNGASUSUSDM", "name": "Natural gas, US", "unit": "$/MMBtu"},
+    {"id": "PCOALAUUSDM", "name": "Coal, Australia", "unit": "$/t"},
+    {"id": "PURANUSDM", "name": "Uranium", "unit": "$/lb"},
+    {"id": "PCOPPUSDM", "name": "Copper", "unit": "$/t"},
+    {"id": "PALUMUSDM", "name": "Aluminium", "unit": "$/t"},
+    {"id": "PNICKUSDM", "name": "Nickel", "unit": "$/t"},
+    {"id": "PIORECRUSDM", "name": "Iron ore", "unit": "$/t"}
+  ],
+
+  "us_weekly": [
+    {"id": "WCESTUS1", "name": "Crude oil stocks (excl. SPR)", "unit": "kb"},
+    {"id": "WCSSTUS1", "name": "Strategic Petroleum Reserve", "unit": "kb"},
+    {"id": "WGTSTUS1", "name": "Gasoline stocks", "unit": "kb"},
+    {"id": "WDISTUS1", "name": "Distillate stocks", "unit": "kb"},
+    {"id": "WCRFPUS2", "name": "Crude oil production", "unit": "kb/d"},
+    {"id": "WPULEUS3", "name": "Refinery utilisation", "unit": "%"},
+    {"id": "GASREGW", "name": "Retail gasoline, regular", "unit": "$/gal"},
+    {"id": "GASDESW", "name": "Retail diesel", "unit": "$/gal"}
+  ],
+
+  "fx_history": ["EUR", "GBP", "JPY", "CNY", "INR", "ZAR", "BRL", "CAD", "AUD", "MXN", "CHF", "NOK", "KRW", "TRY"],
+
+  "power_zones": [
+    ["DE-LU", "Germany"], ["FR", "France"], ["NL", "Netherlands"], ["BE", "Belgium"],
+    ["AT", "Austria"], ["CH", "Switzerland"], ["IT-North", "Italy (North)"], ["ES", "Spain"],
+    ["PT", "Portugal"], ["PL", "Poland"], ["CZ", "Czechia"], ["SK", "Slovakia"],
+    ["HU", "Hungary"], ["SI", "Slovenia"], ["HR", "Croatia"], ["RO", "Romania"],
+    ["BG", "Bulgaria"], ["GR", "Greece"], ["DK1", "Denmark (West)"], ["DK2", "Denmark (East)"],
+    ["SE3", "Sweden (Stockholm)"], ["NO1", "Norway (Oslo)"], ["FI", "Finland"],
+    ["EE", "Estonia"], ["LV", "Latvia"], ["LT", "Lithuania"]
+  ],
+
+  "solar_cities": [
+    ["Lagos", "NGA", 6.455, 3.384], ["Abuja", "NGA", 9.072, 7.491], ["Accra", "GHA", 5.603, -0.187],
+    ["Dakar", "SEN", 14.693, -17.447], ["Abidjan", "CIV", 5.36, -4.008], ["Nairobi", "KEN", -1.286, 36.817],
+    ["Johannesburg", "ZAF", -26.204, 28.047], ["Cairo", "EGY", 30.044, 31.236], ["Casablanca", "MAR", 33.573, -7.589],
+    ["Paris", "FRA", 48.857, 2.352], ["Berlin", "DEU", 52.52, 13.405], ["Madrid", "ESP", 40.417, -3.704],
+    ["London", "GBR", 51.507, -0.128], ["Riyadh", "SAU", 24.713, 46.675], ["Dubai", "ARE", 25.205, 55.271],
+    ["New Delhi", "IND", 28.614, 77.209], ["Beijing", "CHN", 39.904, 116.407], ["Tokyo", "JPN", 35.676, 139.65],
+    ["Houston", "USA", 29.76, -95.37], ["São Paulo", "BRA", -23.55, -46.633]
+  ],
+
+  "news_feeds": [
+    ["EIA Today in Energy", "https://www.eia.gov/rss/todayinenergy.xml"],
+    ["Carbon Brief", "https://www.carbonbrief.org/feed/"],
+    ["OilPrice.com", "https://oilprice.com/rss/main"],
+    ["Google News", "https://news.google.com/rss/search?q=energy+(oil+OR+gas+OR+power+OR+renewables)+when:2d&hl=en&gl=US&ceid=US:en"]
+  ],
+
+  "search_feeds": [
+    ["Google News", "https://news.google.com/rss/search?q=Africa+energy+(power+OR+oil+OR+gas+OR+solar)+when:7d&hl=en&gl=NG&ceid=NG:en"]
+  ],
+
+  "equities": [
+    ["xom.us", "ExxonMobil", "Oil majors"], ["cvx.us", "Chevron", "Oil majors"],
+    ["shel.us", "Shell", "Oil majors"], ["bp.us", "BP", "Oil majors"],
+    ["tte.us", "TotalEnergies", "Oil majors"], ["cop.us", "ConocoPhillips", "E&P"],
+    ["slb.us", "SLB", "Services"], ["nee.us", "NextEra Energy", "Utilities"],
+    ["fslr.us", "First Solar", "Renewables"], ["ccj.us", "Cameco", "Uranium"]
+  ],
+
+  "events": [
+  ]
+}

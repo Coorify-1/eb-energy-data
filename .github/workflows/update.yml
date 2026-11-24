@@ -1,0 +1,53 @@
+name: Update energy data
+
+on:
+  schedule:
+    - cron: "17 */3 * * *"   # every 3 hours (UTC)
+  workflow_dispatch:          # "Run workflow" button in the Actions tab
+  push:
+    branches: [main]
+    paths: ["build.py", "config.json", ".github/workflows/update.yml"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      SITE_URL: ${{ vars.SITE_URL }}
+      FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+      CF_PROJECT: ${{ vars.CF_PROJECT || 'economic-bearings-data' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the only dependency (EU fuel bulletin reader)
+        run: pip install openpyxl==3.1.5
+
+      - name: Build the data files
+        run: python build.py
+
+      - name: Keep the refreshed CSVs in the repo
+        run: |
+          git config user.name "energy-data-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/indicators/*.csv
+          git diff --cached --quiet || (git commit -m "Refresh World Bank indicator CSVs [skip ci]" && git push)
+
+      - name: Publish to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          # creates the Pages project the first time (ignored if it already exists)
+          npx --yes wrangler@3 pages project create "$CF_PROJECT" --production-branch=main || true
+          npx --yes wrangler@3 pages deploy public --project-name="$CF_PROJECT" --branch=main --commit-dirty=true
